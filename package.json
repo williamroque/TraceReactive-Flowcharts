@@ -1,0 +1,19 @@
+{
+  "name": "@tracereactive/flowcharts",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=browser",
+    "build:trpkg": "npm run build && node scripts/build-trpkg.js"
+  },
+  "devDependencies": {
+    "@tracereactive/types": "^1.0.4",
+    "@types/react": "^18.0.0",
+    "adm-zip": "^0.6.1",
+    "esbuild": "^0.28.2",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "elkjs": "^0.12.0"
+  }
+}

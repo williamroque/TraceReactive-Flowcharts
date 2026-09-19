@@ -1,0 +1,9 @@
+{
+  "id": "com.tracereactive.flowcharts",
+  "name": "Flowcharts",
+  "version": "1.0.0",
+  "description": "Standard flowchart nodes and rendering capabilities.",
+  "main": "dist/index.js",
+  "renderer": "dist/renderer.js",
+  "permissions": []
+}
