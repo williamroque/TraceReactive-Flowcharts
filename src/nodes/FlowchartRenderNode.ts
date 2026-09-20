@@ -1,4 +1,5 @@
 import { RenderNode, type InputDefinition } from '@tracereactive/types';
+import { FlowchartCategory } from '../categories';
 import { buildNodeMap, computeEdgePaths } from '../utils/flowchartEdgeUtils';
 import ELK from 'elkjs/lib/elk.bundled.js';
 
@@ -76,6 +77,7 @@ function estimateLabelDimensions(text: string, fontSize: number, padding: number
 export class FlowchartRenderNode extends RenderNode {
     readonly typeId = 'flowchart-render';
     readonly displayName = 'Flowchart';
+    readonly category = FlowchartCategory;
     readonly visible = true;
     readonly dynamicInputs = { baseName: 'Node', acceptsType: 'flowchart' };
     readonly inputs: InputDefinition[] = [];
