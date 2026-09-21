@@ -33,6 +33,7 @@ const serializableNodes = nodes.map(n => ({
     typeId: n.typeId,
     displayName: n.displayName,
     category: n.category,
+    nodeInterface: n.nodeInterface,
     visible: n.visible,
     inputs: n.inputs,
     outputs: n.outputs,
