@@ -11,9 +11,9 @@ export class FlowchartDiamondNode extends FlowchartShapeNode {
         { name: 'text', label: 'Text', type: 'text' as const, defaultValue: '', isPrimary: true },
         { name: 'width', label: 'Width', type: 'number' as const, defaultValue: undefined, min: 0 },
         { name: 'height', label: 'Height', type: 'number' as const, defaultValue: undefined, min: 0 },
-        { name: 'padding', label: 'Padding', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:flowchartNodePadding' },
-        { name: 'fillColor', label: 'Fill', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:flowchartDiamondBackground' },
-        { name: 'borderColor', label: 'Border', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:flowchartDiamondBorder' },
+        { name: 'padding', label: 'Padding', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartNodePadding' },
+        { name: 'fillColor', label: 'Fill', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartDiamondBackground' },
+        { name: 'borderColor', label: 'Border', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartDiamondBorder' },
         { 
             name: 'borderStyle', 
             label: 'Border style', 
@@ -28,8 +28,8 @@ export class FlowchartDiamondNode extends FlowchartShapeNode {
                 { label: 'None', value: 'none' }
             ]
         },
-        { name: 'textColor', label: 'Text color', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:flowchartDiamondTextColor' },
-        { name: 'borderWidth', label: 'Border width', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:flowchartBorderWidth' }
+        { name: 'textColor', label: 'Text color', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartDiamondTextColor' },
+        { name: 'borderWidth', label: 'Border width', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartBorderWidth' }
     ];
 
 

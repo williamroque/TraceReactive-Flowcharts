@@ -11,10 +11,10 @@ export class FlowchartLabelNode extends FlowchartShapeNode {
         { name: 'text', label: 'Text', type: 'text' as const, defaultValue: '', isPrimary: true },
         { name: 'width', label: 'Width', type: 'number' as const, defaultValue: undefined, min: 0 },
         { name: 'height', label: 'Height', type: 'number' as const, defaultValue: undefined, min: 0 },
-        { name: 'padding', label: 'Padding', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:flowchartLabelPadding' },
-        { name: 'backgroundColor', label: 'Background', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:flowchartLabelBackground' },
-        { name: 'textColor', label: 'Text color', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:flowchartLabelColor' },
-        { name: 'borderColor', label: 'Border color', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:flowchartLabelBorder' },
+        { name: 'padding', label: 'Padding', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartLabelPadding' },
+        { name: 'backgroundColor', label: 'Background', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartLabelBackground' },
+        { name: 'textColor', label: 'Text color', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartLabelColor' },
+        { name: 'borderColor', label: 'Border color', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartLabelBorder' },
         { 
             name: 'borderStyle', 
             label: 'Border style', 
@@ -29,9 +29,9 @@ export class FlowchartLabelNode extends FlowchartShapeNode {
                 { label: 'None', value: 'none' }
             ]
         },
-        { name: 'borderWidth', label: 'Border width', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:flowchartLabelBorderWidth' },
-        { name: 'borderRadius', label: 'Border radius', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:flowchartLabelBorderRadius' },
-        { name: 'fontSize', label: 'Font size', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:flowchartLabelFontSize' }
+        { name: 'borderWidth', label: 'Border width', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartLabelBorderWidth' },
+        { name: 'borderRadius', label: 'Border radius', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartLabelBorderRadius' },
+        { name: 'fontSize', label: 'Font size', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartLabelFontSize' }
     ];
 
 

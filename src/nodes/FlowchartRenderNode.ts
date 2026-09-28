@@ -95,8 +95,8 @@ export class FlowchartRenderNode extends RenderNode {
         },
         { name: 'nodeSpacing', type: 'number' as const, defaultValue: 40, min: 0 },
         { name: 'layerSpacing', type: 'number' as const, defaultValue: 50, min: 0 },
-        { name: 'backgroundColor', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:flowchartBackgroundColor' },
-        { name: 'edgeColor', label: 'Edge color', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:flowchartEdgeColor' }
+        { name: 'backgroundColor', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartBackgroundColor' },
+        { name: 'edgeColor', label: 'Edge color', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartEdgeColor' }
     ];
     readonly outputs = [
         { name: 'Render', outputType: 'render' }

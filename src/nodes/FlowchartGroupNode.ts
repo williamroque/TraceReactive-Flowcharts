@@ -48,39 +48,39 @@ export class FlowchartGroupNode extends FlowchartShapeNode {
                 { label: 'Right to Left', value: 'LEFT' }
             ]
         },
-        { name: 'padding', label: 'Padding', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:flowchartNodePadding' },
-        { name: 'nodeSpacing', label: 'Node spacing', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:flowchartGroupNodeSpacing' },
-        { name: 'layerSpacing', label: 'Layer spacing', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:flowchartGroupLayerSpacing' },
+        { name: 'padding', label: 'Padding', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartNodePadding' },
+        { name: 'nodeSpacing', label: 'Node spacing', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartGroupNodeSpacing' },
+        { name: 'layerSpacing', label: 'Layer spacing', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartGroupLayerSpacing' },
         
-        { name: 'fillColor', label: 'Group background', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:flowchartGroupBackground' },
-        { name: 'borderColor', label: 'Group border', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:flowchartGroupBorder' },
+        { name: 'fillColor', label: 'Group background', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartGroupBackground' },
+        { name: 'borderColor', label: 'Group border', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartGroupBorder' },
         { 
             name: 'borderStyle', 
             label: 'Group border style', 
             type: 'style' as const,
             styleType: 'select' as const,
             category: 'style' as const,
-            defaultValue: 'theme:flowchartGroupBorderStyle',
+            defaultValue: 'theme:com.tracereactive.flowcharts.flowchartGroupBorderStyle',
             options: [
-                { label: 'Theme Default', value: 'theme:flowchartGroupBorderStyle' },
+                { label: 'Theme Default', value: 'theme:com.tracereactive.flowcharts.flowchartGroupBorderStyle' },
                 { label: 'Dashed', value: 'dashed' },
                 { label: 'Dotted', value: 'dotted' },
                 { label: 'Solid', value: 'solid' },
                 { label: 'None', value: 'none' }
             ]
         },
-        { name: 'borderWidth', label: 'Group border width', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:flowchartGroupBorderWidth' },
-        { name: 'borderRadius', label: 'Group border radius', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:flowchartGroupBorderRadius' },
-        { name: 'textColor', label: 'Group text color', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:flowchartGroupTextColor' },
+        { name: 'borderWidth', label: 'Group border width', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartGroupBorderWidth' },
+        { name: 'borderRadius', label: 'Group border radius', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartGroupBorderRadius' },
+        { name: 'textColor', label: 'Group text color', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartGroupTextColor' },
         
         // Title styling
-        { name: 'titleColor', label: 'Title color', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:flowchartGroupTitleColor' },
-        { name: 'titleBackgroundColor', label: 'Title background', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:flowchartGroupTitleBackground' },
-        { name: 'titleBorderColor', label: 'Title border', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:flowchartGroupTitleBorder' },
-        { name: 'titleBorderWidth', label: 'Title border width', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:flowchartGroupTitleBorderWidth' },
-        { name: 'titleBorderRadius', label: 'Title border radius', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:flowchartGroupTitleBorderRadius' },
-        { name: 'titlePadding', label: 'Title padding', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:flowchartGroupTitlePadding' },
-        { name: 'titleFontSize', label: 'Title font size', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:flowchartGroupTitleFontSize' },
+        { name: 'titleColor', label: 'Title color', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartGroupTitleColor' },
+        { name: 'titleBackgroundColor', label: 'Title background', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartGroupTitleBackground' },
+        { name: 'titleBorderColor', label: 'Title border', type: 'style' as const, styleType: 'color' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartGroupTitleBorder' },
+        { name: 'titleBorderWidth', label: 'Title border width', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartGroupTitleBorderWidth' },
+        { name: 'titleBorderRadius', label: 'Title border radius', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartGroupTitleBorderRadius' },
+        { name: 'titlePadding', label: 'Title padding', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartGroupTitlePadding' },
+        { name: 'titleFontSize', label: 'Title font size', type: 'style' as const, styleType: 'size' as const, category: 'style' as const, defaultValue: 'theme:com.tracereactive.flowcharts.flowchartGroupTitleFontSize' },
         {
             name: 'entryPoint',
             label: 'Entry Point',
