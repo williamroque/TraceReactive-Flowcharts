@@ -1,6 +1,7 @@
 import { RenderNode, type InputDefinition } from '@tracereactive/types';
 import { FlowchartCategory } from '../categories';
 import { buildNodeMap, computeEdgePaths } from '../utils/flowchartEdgeUtils';
+import { getSvgFillAttributes, getSvgStrokeAttributes, getStrokeDashArray, getSvgBackgroundStyle, parseSvgColor } from '../utils/flowchartColorUtils';
 import ELK from 'elkjs/lib/elk.bundled.js';
 
 const elk = new ELK();
@@ -116,9 +117,9 @@ export class FlowchartRenderNode extends RenderNode {
         const edges: any[] = [];
         const visited = new Set<string>();
 
-        const resolveIncoming = (inc: any): { sourceNode: any, labels: any[] } | null => {
-            if (!inc) return null;
-            const labels: any[] = [];
+        const resolveIncoming = (inc: any, currentLabels: any[] = []): { sourceNode: any, labels: any[] }[] => {
+            if (!inc) return [];
+            const labels: any[] = [...currentLabels];
             let curr = inc;
             const labelVisited = new Set<string>();
 
@@ -147,8 +148,19 @@ export class FlowchartRenderNode extends RenderNode {
                 curr = next;
             }
 
-            if (!curr || curr.isEdgeLabel) return null;
-            return { sourceNode: curr, labels };
+            if (!curr || curr.isEdgeLabel) return [];
+            
+            if (curr.isCombine) {
+                const results: { sourceNode: any, labels: any[] }[] = [];
+                if (curr.incoming && Array.isArray(curr.incoming)) {
+                    for (const combineInc of curr.incoming) {
+                        results.push(...resolveIncoming(combineInc, labels));
+                    }
+                }
+                return results;
+            }
+
+            return [{ sourceNode: curr, labels }];
         };
 
         // Traverse the connected graph
@@ -159,10 +171,12 @@ export class FlowchartRenderNode extends RenderNode {
             visited.add(current.id);
 
             // If a label node was directly passed, push its real source shape
-            if (current.isEdgeLabel) {
-                const resolved = resolveIncoming(current);
-                if (resolved && resolved.sourceNode) {
-                    queue.push(resolved.sourceNode);
+            if (current.isEdgeLabel || current.isCombine) {
+                const resolvedList = resolveIncoming(current);
+                for (const resolved of resolvedList) {
+                    if (resolved.sourceNode) {
+                        queue.push(resolved.sourceNode);
+                    }
                 }
                 continue;
             }
@@ -172,17 +186,20 @@ export class FlowchartRenderNode extends RenderNode {
             // Traverse incoming edges
             if (current.incoming && Array.isArray(current.incoming)) {
                 for (const inc of current.incoming) {
-                    const resolved = resolveIncoming(inc);
-                    if (resolved && resolved.sourceNode) {
-                        queue.push(resolved.sourceNode);
-                        let sourceId = resolved.sourceNode.id;
-                        // Keep group as source to allow edge from group to group or group to node
-                        edges.push({
-                            id: `e_${sourceId}_${current.id}`,
-                            sources: [sourceId],
-                            targets: [current.id],
-                            labels: resolved.labels
-                        });
+                    const resolvedList = resolveIncoming(inc);
+                    for (const resolved of resolvedList) {
+                        if (resolved.sourceNode) {
+                            queue.push(resolved.sourceNode);
+                            if (!current.isCombine) {
+                                let sourceId = resolved.sourceNode.id;
+                                edges.push({
+                                    id: `e_${sourceId}_${current.id}`,
+                                    sources: [sourceId],
+                                    targets: [current.id],
+                                    labels: resolved.labels
+                                });
+                            }
+                        }
                     }
                 }
             }
@@ -190,9 +207,11 @@ export class FlowchartRenderNode extends RenderNode {
             // Traverse group roots without creating edges
             if (current.groupRoots && Array.isArray(current.groupRoots)) {
                 for (const root of current.groupRoots) {
-                    const resolved = resolveIncoming(root);
-                    if (resolved && resolved.sourceNode) {
-                        queue.push(resolved.sourceNode);
+                    const resolvedList = resolveIncoming(root);
+                    for (const resolved of resolvedList) {
+                        if (resolved.sourceNode) {
+                            queue.push(resolved.sourceNode);
+                        }
                     }
                 }
             }
@@ -204,6 +223,7 @@ export class FlowchartRenderNode extends RenderNode {
 
         // First pass: create all ELK nodes (both standard and groups)
         flatNodes.forEach(n => {
+            if (n.isCombine) return;
             const parsedWidth = parseFloat(String(n.width));
             const fixedWidth = !isNaN(parsedWidth) && parsedWidth > 0 ? parsedWidth : undefined;
             const dims = estimateDimensions(n.text || '', 13, parseFloat(String(n.padding)) || 10, fixedWidth);
@@ -541,21 +561,30 @@ export class FlowchartRenderNode extends RenderNode {
             removeDummies(layoutResult);
         }
 
-        const backgroundColor = properties['backgroundColor'] || '#00000000';
-        const edgeColor = properties['edgeColor'] || '#f7eee2';
+        const bgStyle = getSvgBackgroundStyle(properties['backgroundColor']);
+        const edgeColorParsed = parseSvgColor(properties['edgeColor'], '#f7eee2');
+        const edgeColor = edgeColorParsed.color === 'none' ? '#f7eee2' : edgeColorParsed.color;
+        let edgeStrokeAttrs = `stroke="${edgeColor}" stroke-width="2"`;
+        if (edgeColorParsed.opacity !== undefined && edgeColorParsed.opacity < 1) {
+            edgeStrokeAttrs += ` stroke-opacity="${edgeColorParsed.opacity}"`;
+        }
 
         let layoutWidth = layoutResult?.width || 500;
         let layoutHeight = layoutResult?.height || 500;
         if (layoutWidth < 10) layoutWidth = 500;
         if (layoutHeight < 10) layoutHeight = 500;
 
-        let svgContent = `<svg width="${layoutWidth}" height="${layoutHeight}" viewBox="0 0 ${layoutWidth} ${layoutHeight}" style="background-color: ${backgroundColor};" xmlns="http://www.w3.org/2000/svg">`;
+        let svgContent = `<svg width="${layoutWidth}" height="${layoutHeight}" viewBox="0 0 ${layoutWidth} ${layoutHeight}"${bgStyle} xmlns="http://www.w3.org/2000/svg">`;
         
         // Defs for arrowhead
         const markerId = `arrowhead-${Math.random().toString(36).substr(2, 9)}`;
+        const markerFill = edgeColor;
+        const markerFillOpacity = (edgeColorParsed.opacity !== undefined && edgeColorParsed.opacity < 1)
+            ? ` fill-opacity="${edgeColorParsed.opacity}"`
+            : '';
         svgContent += `<defs>
             <marker id="${markerId}" viewBox="0 -5 10 10" refX="10" refY="0" orient="auto" markerWidth="6" markerHeight="6" xoverflow="visible">
-                <path d="M 0,-5 L 10 ,0 L 0,5" fill="${edgeColor}" stroke="none" />
+                <path d="M 0,-5 L 10 ,0 L 0,5" fill="${markerFill}"${markerFillOpacity} stroke="none" />
             </marker>
         </defs>`;
 
@@ -570,7 +599,7 @@ export class FlowchartRenderNode extends RenderNode {
                     for (let i = 1; i < points.length; i++) {
                         d += ` L ${points[i].x},${points[i].y}`;
                     }
-                    svg += `<path d="${d}" fill="none" stroke="${edgeColor}" stroke-width="2" marker-end="url(#${markerId})" />`;
+                    svg += `<path d="${d}" fill="none" ${edgeStrokeAttrs} marker-end="url(#${markerId})" />`;
                 });
 
                 if (edge.labels && edge.labels.length > 0) {
@@ -626,19 +655,24 @@ export class FlowchartRenderNode extends RenderNode {
                         if (lx === undefined) lx = (label.x || 0) - lw / 2;
                         if (ly === undefined) ly = (label.y || 0) - lh / 2;
                         
-                        const fill = (label.backgroundColor && label.backgroundColor !== 'transparent') ? label.backgroundColor : 'var(--secondary-color)';
-                        const textColor = (label.textColor && label.textColor !== 'transparent') ? label.textColor : 'var(--text-color)';
-                        const borderColor = (label.borderColor && label.borderColor !== 'transparent') ? label.borderColor : 'var(--border-color)';
+                        const labelFillAttrs = getSvgFillAttributes(label.backgroundColor, '#2C2D2F');
+                        const labelStrokeAttrs = getSvgStrokeAttributes(label.borderColor, label.borderStyle, '#444444');
+                        const labelTextParsed = parseSvgColor(label.textColor, '#f7eee2');
+                        const textColor = labelTextParsed.color === 'none' ? '#f7eee2' : labelTextParsed.color;
+                        const labelTextOpacityAttr = (labelTextParsed.opacity !== undefined && labelTextParsed.opacity < 1)
+                            ? ` fill-opacity="${labelTextParsed.opacity}"`
+                            : '';
+
                         const borderWidth = label.borderWidth ?? 1;
                         const borderRadius = label.borderRadius ?? 4;
                         const fontSize = label.fontSize ?? 11;
                         
-                        svg += `<rect x="${lx}" y="${ly}" width="${lw}" height="${lh}" fill="${fill}" stroke="${borderColor}" stroke-width="${borderWidth}" rx="${borderRadius}" ry="${borderRadius}" />`;
+                        svg += `<rect x="${lx}" y="${ly}" width="${lw}" height="${lh}" ${labelFillAttrs} ${labelStrokeAttrs} stroke-width="${borderWidth}" rx="${borderRadius}" ry="${borderRadius}" />`;
                         
                         const lines = String(label.text || '').split('\\n');
                         const lineHeight = 1.2;
                         
-                        svg += `<text x="${lx + lw/2}" y="${ly + lh/2}" text-anchor="middle" dominant-baseline="middle" fill="${textColor}" font-size="${fontSize}px" font-weight="500">`;
+                        svg += `<text x="${lx + lw/2}" y="${ly + lh/2}" text-anchor="middle" dominant-baseline="middle" fill="${textColor}"${labelTextOpacityAttr} font-size="${fontSize}px" font-weight="500">`;
                         lines.forEach((line, i) => {
                             const dy = i === 0 ? `-${(lines.length - 1) * lineHeight / 2}em` : `${lineHeight}em`;
                             svg += `<tspan x="${lx + lw/2}" dy="${dy}">${line}</tspan>`;
@@ -661,41 +695,45 @@ export class FlowchartRenderNode extends RenderNode {
                 const h = node.height || 0;
                 const type = shapeData.type;
                 const padding = shapeData.padding ?? 10;
+                const isGroup = type === 'flowchart-group';
                 
-                const fill = shapeData.fillColor || '#00000000';
-                const stroke = shapeData.borderColor || '#000000';
-                const strokeWidth = shapeData.borderWidth || 2;
+                const fillAttrs = getSvgFillAttributes(shapeData.fillColor, isGroup ? 'none' : '#1D1E1F');
+                const strokeAttrs = getSvgStrokeAttributes(shapeData.borderColor, shapeData.borderStyle, isGroup ? '#c084fc' : '#000000');
+                const strokeWidth = shapeData.borderWidth ?? 2;
+                const dash = getStrokeDashArray(shapeData.borderStyle, isGroup ? 'dashed' : 'solid');
+                const dashAttr = dash ? ` stroke-dasharray="${dash}"` : '';
                 
                 svg += `<g transform="translate(${absX}, ${absY})">`;
                 
                 if (type === 'flowchart-oval') {
-                    svg += `<ellipse cx="${w/2}" cy="${h/2}" rx="${w/2}" ry="${h/2}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" />`;
+                    svg += `<ellipse cx="${w/2}" cy="${h/2}" rx="${w/2}" ry="${h/2}" ${fillAttrs} ${strokeAttrs} stroke-width="${strokeWidth}"${dashAttr} />`;
                 } else if (type === 'flowchart-rectangle') {
                     const rx = shapeData.borderRadius ?? 8;
-                    svg += `<rect width="${w}" height="${h}" rx="${rx}" ry="${rx}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" />`;
+                    svg += `<rect width="${w}" height="${h}" rx="${rx}" ry="${rx}" ${fillAttrs} ${strokeAttrs} stroke-width="${strokeWidth}"${dashAttr} />`;
                 } else if (type === 'flowchart-diamond') {
                     const points = `${w/2},0 ${w},${h/2} ${w/2},${h} 0,${h/2}`;
-                    svg += `<polygon points="${points}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" />`;
+                    svg += `<polygon points="${points}" ${fillAttrs} ${strokeAttrs} stroke-width="${strokeWidth}"${dashAttr} />`;
                 } else if (type === 'flowchart-parallelogram') {
                     const skew = 15;
                     const points = `${skew},0 ${w},0 ${w-skew},${h} 0,${h}`;
-                    svg += `<polygon points="${points}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" />`;
+                    svg += `<polygon points="${points}" ${fillAttrs} ${strokeAttrs} stroke-width="${strokeWidth}"${dashAttr} />`;
                 } else if (type === 'flowchart-group') {
                     const rx = shapeData.borderRadius ?? 8;
-                    svg += `<rect width="${w}" height="${h}" rx="${rx}" ry="${rx}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-dasharray="5,5" />`;
+                    svg += `<rect width="${w}" height="${h}" rx="${rx}" ry="${rx}" ${fillAttrs} ${strokeAttrs} stroke-width="${strokeWidth}"${dashAttr} />`;
                     
                     if (shapeData.title) {
-                        const textColor = shapeData.titleColor && shapeData.titleColor !== 'transparent' ? shapeData.titleColor : (shapeData.textColor || 'var(--text-color)');
+                        const titleColorParsed = parseSvgColor(shapeData.titleColor, shapeData.textColor || '#f7eee2');
+                        const textColor = titleColorParsed.color === 'none' ? '#f7eee2' : titleColorParsed.color;
+                        const titleOpacityAttr = (titleColorParsed.opacity !== undefined && titleColorParsed.opacity < 1)
+                            ? ` fill-opacity="${titleColorParsed.opacity}"`
+                            : '';
                         const fontSize = parseFloat(String(shapeData.titleFontSize)) || 14;
                         const titleLines = String(shapeData.title || '').split('\\n');
-                        const maxTitleChars = Math.max(...titleLines.map(l => l.length), 0);
-                        const titleWidth = maxTitleChars * (fontSize * 0.6) + 8;
-                        const titleHeight = titleLines.length * fontSize * 1.2 + 8;
                         
                         const tx = w / 2;
                         const ty = 14;
                         
-                        svg += `<text x="${tx}" y="${ty + 4}" text-anchor="middle" dominant-baseline="hanging" fill="${textColor}" font-size="${fontSize}px" font-weight="bold">`;
+                        svg += `<text x="${tx}" y="${ty + 4}" text-anchor="middle" dominant-baseline="hanging" fill="${textColor}"${titleOpacityAttr} font-size="${fontSize}px" font-weight="bold">`;
                         titleLines.forEach((line, i) => {
                             const dy = i === 0 ? '0em' : '1.2em';
                             svg += `<tspan x="${tx}" dy="${dy}">${line}</tspan>`;
@@ -706,23 +744,20 @@ export class FlowchartRenderNode extends RenderNode {
                     if (node.children && node.children.length > 0) {
                         svg += generateNodesSvg(node.children, 0, 0); // recursive
                     }
-                    if (node.edges && node.edges.length > 0) {
-                        // For edges within a group, we need to pass their absolute positions...
-                        // But computeEdgePaths uses nodeMap which has absolute positions! 
-                        // So edges are computed in absolute coords. We must close the `<g>` first or offset them back.
-                        // Actually, if we close the `<g>`, we can just draw edges at root. Let's just draw them inside `<g>` and offset paths? No, paths are absolute.
-                        // We will collect edges and draw them at the root.
-                    }
                 }
                 
                 if (shapeData.text && type !== 'flowchart-group') {
-                    const textColor = shapeData.textColor || 'var(--text-color)';
+                    const textParsed = parseSvgColor(shapeData.textColor, '#f7eee2');
+                    const textColor = textParsed.color === 'none' ? '#f7eee2' : textParsed.color;
+                    const textOpacityAttr = (textParsed.opacity !== undefined && textParsed.opacity < 1)
+                        ? ` fill-opacity="${textParsed.opacity}"`
+                        : '';
                     const availableWidth = w - padding * 2;
                     const charsPerLine = Math.max(1, Math.floor(availableWidth / (13 * 0.6)));
                     const lines = wrapText(shapeData.text, charsPerLine);
                     const lineHeight = 1.2;
                     
-                    svg += `<text x="${w/2}" y="${h/2}" text-anchor="middle" dominant-baseline="middle" fill="${textColor}" font-size="13px">`;
+                    svg += `<text x="${w/2}" y="${h/2}" text-anchor="middle" dominant-baseline="middle" fill="${textColor}"${textOpacityAttr} font-size="13px">`;
                     lines.forEach((line, i) => {
                         const dy = i === 0 ? `-${(lines.length - 1) * lineHeight / 2}em` : `${lineHeight}em`;
                         svg += `<tspan x="${w/2}" dy="${dy}">${line}</tspan>`;

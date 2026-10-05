@@ -6,6 +6,7 @@ import { FlowchartRectangleNode } from './nodes/FlowchartRectangleNode';
 import { FlowchartLabelNode } from './nodes/FlowchartLabelNode';
 import { FlowchartGroupNode } from './nodes/FlowchartGroupNode';
 import { FlowchartRenderNode } from './nodes/FlowchartRenderNode';
+import { FlowchartCombineNode } from './nodes/FlowchartCombineNode';
 
 // The traceReactive API is exposed via preload in the sandbox
 declare const traceReactive: {
@@ -25,7 +26,8 @@ const nodes = [
     new FlowchartRectangleNode(),
     new FlowchartLabelNode(),
     new FlowchartGroupNode(),
-    new FlowchartRenderNode()
+    new FlowchartRenderNode(),
+    new FlowchartCombineNode()
 ];
 
 // 2. Register with the host app

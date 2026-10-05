@@ -158,9 +158,13 @@ export class FlowchartGroupNode extends FlowchartShapeNode {
                 if (!curr || visited.has(curr)) continue;
                 visited.add(curr);
                 
-                if (curr.isEdgeLabel) {
-                    const next = curr.sourceShape || (curr.incoming && curr.incoming[0]);
-                    if (next) queue.push(next);
+                if (curr.isEdgeLabel || curr.isCombine) {
+                    if (curr.isCombine && curr.incoming) {
+                        for (const inc of curr.incoming) queue.push(inc);
+                    } else if (curr.isEdgeLabel) {
+                        const next = curr.sourceShape || (curr.incoming && curr.incoming[0]);
+                        if (next) queue.push(next);
+                    }
                     continue;
                 }
 
@@ -179,17 +183,27 @@ export class FlowchartGroupNode extends FlowchartShapeNode {
                 let hasIncoming = false;
                 if (node.incoming) {
                     for (const inc of node.incoming) {
-                        let actualInc = inc;
+                        let actualIncList = [inc];
                         let edgeVisited = new Set<any>();
-                        while (actualInc && actualInc.isEdgeLabel) {
-                            if (edgeVisited.has(actualInc)) break;
+                        while (actualIncList.length > 0) {
+                            const actualInc = actualIncList.shift();
+                            if (!actualInc) continue;
+                            if (edgeVisited.has(actualInc)) continue;
                             edgeVisited.add(actualInc);
-                            actualInc = actualInc.sourceShape || (actualInc.incoming && actualInc.incoming[0]);
+                            
+                            if (actualInc.isEdgeLabel) {
+                                const next = actualInc.sourceShape || (actualInc.incoming && actualInc.incoming[0]);
+                                if (next) actualIncList.push(next);
+                            } else if (actualInc.isCombine) {
+                                if (actualInc.incoming) actualIncList.push(...actualInc.incoming);
+                            } else {
+                                if (allNodesInGraph.has(actualInc)) {
+                                    hasIncoming = true;
+                                    break;
+                                }
+                            }
                         }
-                        if (actualInc && allNodesInGraph.has(actualInc)) {
-                            hasIncoming = true;
-                            break;
-                        }
+                        if (hasIncoming) break;
                     }
                 }
 
