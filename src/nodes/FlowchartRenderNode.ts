@@ -735,18 +735,38 @@ export class FlowchartRenderNode extends RenderNode {
             return svg;
         };
 
-        const collectAllEdges = (node: any, outEdges: any[]) => {
+        const collectAllEdges = (node: any, outEdges: any[], offsetX = 0, offsetY = 0) => {
+            const absX = offsetX + (node.x || 0);
+            const absY = offsetY + (node.y || 0);
+
             if (node.edges) {
-                outEdges.push(...node.edges);
+                node.edges.forEach((e: any) => {
+                    if (e.sections) {
+                        e.sections.forEach((sec: any) => {
+                            if (sec.startPoint) { sec.startPoint.x += absX; sec.startPoint.y += absY; }
+                            if (sec.endPoint) { sec.endPoint.x += absX; sec.endPoint.y += absY; }
+                            if (sec.bendPoints) {
+                                sec.bendPoints.forEach((bp: any) => { bp.x += absX; bp.y += absY; });
+                            }
+                        });
+                    }
+                    if (e.labels) {
+                        e.labels.forEach((label: any) => {
+                            if (label.x !== undefined) label.x += absX;
+                            if (label.y !== undefined) label.y += absY;
+                        });
+                    }
+                    outEdges.push(e);
+                });
             }
             if (node.children) {
-                node.children.forEach((c: any) => collectAllEdges(c, outEdges));
+                node.children.forEach((c: any) => collectAllEdges(c, outEdges, absX, absY));
             }
         };
 
         let allEdgesToDraw: any[] = [];
         if (layoutResult) {
-            collectAllEdges(layoutResult, allEdgesToDraw);
+            collectAllEdges(layoutResult, allEdgesToDraw, 0, 0);
             svgContent += generateEdgesSvg(allEdgesToDraw);
             svgContent += generateNodesSvg(layoutResult.children || [], 0, 0);
         }
